@@ -1,0 +1,32 @@
+{
+
+  "compilerOptions": {
+ 
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    "module": "ES2022",
+    "target": "ES2022",
+    "moduleResolution": "Bundler",
+    "types": [],
+  
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "jsx": "react-jsx",
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+    "types": ["node"], 
+  },
+  "include": ["src"]
+}

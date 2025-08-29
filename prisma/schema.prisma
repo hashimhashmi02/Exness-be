@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"   // default output (DON'T set custom output)
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Interval {
+  ONE_MIN
+  FIVE_MIN
+}
+
+enum OrderSide {
+  BUY
+  SELL
+}
+
+enum OrderStatus {
+  OPEN
+  CLOSED
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  wallets   Wallet[]
+  orders    Order[]
+}
+
+model Wallet {
+  id        Int     @id @default(autoincrement())
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  currency  String
+  qty       Decimal @db.Decimal(38, 12)
+  @@unique([userId, currency])
+}
+
+model Candle {
+  id        Int       @id @default(autoincrement())
+  symbol    String
+  interval  Interval
+  tStart    DateTime
+  open      Decimal   @db.Decimal(38, 12)
+  high      Decimal   @db.Decimal(38, 12)
+  low       Decimal   @db.Decimal(38, 12)
+  close     Decimal   @db.Decimal(38, 12)
+  volume    Decimal   @db.Decimal(38, 12)
+
+  @@unique([symbol, interval, tStart])
+  @@index([symbol, interval, tStart])
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int
+  symbol      String
+  side        OrderSide
+  qty         Decimal     @db.Decimal(38, 12)
+  entryPrice  Decimal     @db.Decimal(38, 12)
+  stopLoss    Decimal?    @db.Decimal(38, 12)
+  takeProfit  Decimal?    @db.Decimal(38, 12)
+  status      OrderStatus @default(OPEN)
+  openedAt    DateTime    @default(now())
+  closedAt    DateTime?
+  closePrice  Decimal?    @db.Decimal(38, 12)
+}

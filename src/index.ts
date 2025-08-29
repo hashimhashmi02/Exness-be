@@ -1,4 +1,3 @@
-// src/index.ts
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -28,8 +27,6 @@ app.use("/api/v1", marketRoutes);
 app.get("/", (_req, res) => res.send("Exness V0 backend up"));
 
 const server = http.createServer(app);
-
-/* ---------------------- WS with per-connection filter ---------------------- */
 
 type Client = WebSocket & { _symbols?: string[]; _alive?: boolean };
 
@@ -61,20 +58,19 @@ function makeUpdates(symbols: string[]) {
 const wss = new WebSocketServer({ server, path: "/ws" });
 
 wss.on("connection", (ws: Client, req) => {
-  // parse ?symbols=ETH,SOL (default = all supported)
+
   const url = new URL(req.url || "/ws", "http://localhost");
   ws._symbols = parseSymbolsParam(url.searchParams.get("symbols"));
 
-  // heartbeat for clients
+
   ws._alive = true;
   ws.on("pong", () => (ws._alive = true));
 
-  // send an immediate snapshot
   const snap = makeUpdates(ws._symbols!);
   if (snap.length) ws.send(JSON.stringify({ price_updates: snap }));
 });
 
-// ping clients & drop dead ones
+
 setInterval(() => {
   wss.clients.forEach((c) => {
     const ws = c as Client;
@@ -86,7 +82,7 @@ setInterval(() => {
   });
 }, 30_000);
 
-// send tailored updates to each client
+
 function broadcastPrices() {
   wss.clients.forEach((c) => {
     const ws = c as Client;
@@ -96,21 +92,20 @@ function broadcastPrices() {
   });
 }
 
-/* ----------------- Binance trade feed -> cache & broadcast ----------------- */
 
 console.log("[symbols]", SUPPORTED.join(", "));
 const feed = new BinanceTradeFeed();
 feed.onTrade(async (symbol, priceInt, ts) => {
   priceBook.set(symbol, priceInt);
-  broadcastPrices();                    // ← IMPORTANT: push updates on every tick
+  broadcastPrices();                    
   await onTradeForCandles(symbol, priceInt, ts);
 });
 feed.start();
 
-// optional: periodic snapshots even if no trades in a moment
+
 setInterval(() => broadcastPrices(), 2000);
 
-/* --------------------------------- Server --------------------------------- */
+
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`API http://localhost:${PORT}`));

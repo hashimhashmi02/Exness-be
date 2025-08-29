@@ -1,1 +1,2 @@
-export type JwtUser = { id: number; email: string };
+
+export type JwtUser = { id: string; email: string };

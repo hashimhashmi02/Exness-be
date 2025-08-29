@@ -1,15 +1,10 @@
 generator client {
-  provider = "prisma-client-js"   // default output (DON'T set custom output)
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-enum Interval {
-  ONE_MIN
-  FIVE_MIN
 }
 
 enum OrderSide {
@@ -23,50 +18,41 @@ enum OrderStatus {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
+  id        String   @id @default(uuid())
+  email     String   @unique
   password  String
-  createdAt DateTime  @default(now())
-  wallets   Wallet[]
-  orders    Order[]
-}
+  createdAt DateTime @default(now())
 
-model Wallet {
-  id        Int     @id @default(autoincrement())
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
-  currency  String
-  qty       Decimal @db.Decimal(38, 12)
-  @@unique([userId, currency])
-}
+  usdBalance BigInt @default(500000) @db.BigInt
 
-model Candle {
-  id        Int       @id @default(autoincrement())
-  symbol    String
-  interval  Interval
-  tStart    DateTime
-  open      Decimal   @db.Decimal(38, 12)
-  high      Decimal   @db.Decimal(38, 12)
-  low       Decimal   @db.Decimal(38, 12)
-  close     Decimal   @db.Decimal(38, 12)
-  volume    Decimal   @db.Decimal(38, 12)
-
-  @@unique([symbol, interval, tStart])
-  @@index([symbol, interval, tStart])
+  orders Order[]
 }
 
 model Order {
-  id          Int         @id @default(autoincrement())
+  id          String      @id @default(uuid())
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      Int
+  userId      String
   symbol      String
   side        OrderSide
-  qty         Decimal     @db.Decimal(38, 12)
-  entryPrice  Decimal     @db.Decimal(38, 12)
-  stopLoss    Decimal?    @db.Decimal(38, 12)
-  takeProfit  Decimal?    @db.Decimal(38, 12)
+  marginCents BigInt      @db.BigInt
+  leverage    Int
+  openPrice   BigInt      @db.BigInt
+  closePrice  BigInt?     @db.BigInt
+  pnlCents    BigInt?     @db.BigInt
   status      OrderStatus @default(OPEN)
   openedAt    DateTime    @default(now())
   closedAt    DateTime?
-  closePrice  Decimal?    @db.Decimal(38, 12)
+}
+
+model CandleM1 {
+  id     BigInt   @id @default(autoincrement())
+  symbol String
+  ts     DateTime
+  open   BigInt   @db.BigInt
+  high   BigInt   @db.BigInt
+  low    BigInt   @db.BigInt
+  close  BigInt   @db.BigInt
+
+  @@unique([symbol, ts], name: "symbol_ts")
+  @@index([symbol, ts])
 }

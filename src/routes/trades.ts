@@ -35,7 +35,7 @@ r.post("/trade", auth, async (req, res) => {
   if (Number(user.usdBalance) < b.margin)
     return res.status(411).json({ message: "Incorrect inputs" });
 
-  // mark price + spread
+  
   const mark = priceBook.get(symbol);
   if (!mark) return res.status(411).json({ message: "Incorrect inputs" });
   const { buy, sell } = withSpread(mark);
@@ -73,10 +73,10 @@ r.get("/trades/open", auth, async (req, res) => {
   res.json({
     trades: rows.map(o => ({
       orderId: o.id,
-      type: o.side,                       // "BUY" | "SELL"
-      margin: Number(o.marginCents),      // cents
+      type: o.side,                       
+      margin: Number(o.marginCents),      
       leverage: o.leverage,
-      openPrice: Number(o.openPrice)      // integer price
+      openPrice: Number(o.openPrice)      
     }))
   });
 });
@@ -92,16 +92,15 @@ r.get("/trades", auth, async (req, res) => {
     trades: rows.map(o => ({
       orderId: o.id,
       type: o.side,
-      margin: Number(o.marginCents),      // cents
+      margin: Number(o.marginCents),      
       leverage: o.leverage,
-      openPrice: Number(o.openPrice),     // int
+      openPrice: Number(o.openPrice),     
       closePrice: Number(o.closePrice ?? 0),
-      pnl: Number(o.pnlCents ?? 0)        // cents
+      pnl: Number(o.pnlCents ?? 0)       
     }))
   });
 });
 
-// Close order helper (manual close for testing)
 const CloseBody = z.object({ orderId: z.string() });
 
 r.post("/trade/close", auth, async (req, res) => {

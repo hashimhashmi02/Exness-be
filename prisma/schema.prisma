@@ -32,17 +32,26 @@ model Order {
   id          String      @id @default(uuid())
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
+
   symbol      String
   side        OrderSide
-  marginCents BigInt      @db.BigInt
+
+  marginCents BigInt
   leverage    Int
-  openPrice   BigInt      @db.BigInt
-  closePrice  BigInt?     @db.BigInt
-  pnlCents    BigInt?     @db.BigInt
+
+  openPrice   BigInt
+  closePrice  BigInt?
+  pnlCents    BigInt?
+
+  // NEW (integer price, same scale as openPrice)
+  stopLossPrice   BigInt?
+  takeProfitPrice BigInt?
+
   status      OrderStatus @default(OPEN)
   openedAt    DateTime    @default(now())
   closedAt    DateTime?
 }
+
 
 model CandleM1 {
   id     BigInt   @id @default(autoincrement())

@@ -12,7 +12,7 @@ export function priceIntToCents(priceInt: number): number {
 }
 
 export function withSpread(markPriceInt: number) {
-  const half = env.SPREAD_BPS / 2 / 10000; // e.g. 0.005 for 1% total
+  const half = env.SPREAD_BPS / 2 / 10000;
   const buy = Math.round(markPriceInt * (1 + half));
   const sell = Math.round(markPriceInt * (1 - half));
   return { buy, sell };

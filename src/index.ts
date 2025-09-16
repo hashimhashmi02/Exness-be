@@ -101,11 +101,7 @@ feed.onTrade(async (symbol, priceInt, ts) => {
   await onTradeForCandles(symbol, priceInt, ts);
 });
 feed.start();
-
-
 setInterval(() => broadcastPrices(), 2000);
-
-
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`API http://localhost:${PORT}`));

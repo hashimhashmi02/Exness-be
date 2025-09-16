@@ -1,13 +1,10 @@
 import { prisma } from "../lib/prisma.js";
 
 type Buf = { tsStart: number; open: number; high: number; low: number; close: number };
-
-// active minute OHLC buffers per symbol
 const buffers: Record<string, Buf> = {};
 
 const minuteStart = (ts: number) => Math.floor(ts / 60000) * 60000;
 
-// ---- simple serialized flush queue ----
 type FlushTask = { symbol: string; buf: Buf };
 const queue: FlushTask[] = [];
 let flushing = false;
@@ -25,7 +22,7 @@ async function drain() {
           create: { symbol, ts: new Date(buf.tsStart), open: buf.open, high: buf.high, low: buf.low, close: buf.close }
         });
       } catch (e: any) {
-        // If table not created yet or transient pool issue, log once and move on
+  
         const code = e?.code ?? "";
         if (code !== "P2021") {
           console.error("candle upsert error:", e?.message ?? e);
@@ -36,25 +33,19 @@ async function drain() {
     flushing = false;
   }
 }
-// ---------------------------------------
-
-// called on every trade tick
 export async function onTradeForCandles(symbol: string, priceInt: number, ts: number) {
   const ms = minuteStart(ts);
   const prev = buffers[symbol];
 
-  // minute rolled: queue flush of the previous minute
   if (!prev || prev.tsStart !== ms) {
     if (prev) {
       queue.push({ symbol, buf: prev });
-      // fire-and-forget; serialize in background
+   
       void drain();
     }
     buffers[symbol] = { tsStart: ms, open: priceInt, high: priceInt, low: priceInt, close: priceInt };
     return;
   }
-
-  // update current minute buffer
   prev.close = priceInt;
   if (priceInt > prev.high) prev.high = priceInt;
   if (priceInt < prev.low) prev.low = priceInt;

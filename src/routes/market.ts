@@ -7,7 +7,6 @@ import { priceBook } from "../state/priceBook.js";
 
 const r = Router();
 
-// 7) Get candles (GET /api/v1/candles?asset=BTC&startTime&endTime&ts=1m/1w/1d)
 const Q = z.object({
   asset: z.string(),
   startTime: z.coerce.number().optional(),
@@ -26,13 +25,12 @@ r.get("/candles", async (req, res) => {
 
   const rows = await prisma.candleM1.findMany({ where, orderBy: { ts: "asc" } });
 
-  // aggregate to 1d / 1w if requested
   function bucket(ts: number) {
     if (q.ts === "1m") return Math.floor(ts / 60000) * 60000;
     if (q.ts === "1d") {
       const d = new Date(ts); d.setUTCHours(0,0,0,0); return d.getTime();
     }
-    // 1w: Monday 00:00 UTC bucket
+ 
     const d = new Date(ts); const day = (d.getUTCDay() + 6) % 7; // 0..6, 0=Mon
     d.setUTCDate(d.getUTCDate() - day); d.setUTCHours(0,0,0,0); return d.getTime();
   }
@@ -59,7 +57,6 @@ r.get("/candles", async (req, res) => {
   res.json({ candles });
 });
 
-// 8) Get assets (GET /api/v1/assets)
 r.get("/assets", async (_req, res) => {
   const assets = SUPPORTED.map(sym => {
     const mark = priceBook.get(sym);

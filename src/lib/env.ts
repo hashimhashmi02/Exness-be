@@ -5,7 +5,7 @@ const Env = z.object({
   JWT_SECRET: z.string().min(6),
   SYMBOLS: z.string().default("BTCUSDT,ETHUSDT,SOLUSDT"),
   PRICE_DECIMALS: z.coerce.number().int().min(0).default(4),
-  SPREAD_BPS: z.coerce.number().int().min(0).default(100) // 1% total
+  SPREAD_BPS: z.coerce.number().int().min(0).default(100) 
 });
 
 export const env = Env.parse(process.env);

@@ -8,7 +8,6 @@ import { auth } from "../middleware/auth.js";
 
 const r = Router();
 
-// 1) Signup (POST /api/v1/user/signup)
 const Creds = z.object({ email: z.string().email(), password: z.string().min(6) });
 
 r.post("/user/signup", async (req, res) => {
@@ -24,7 +23,6 @@ r.post("/user/signup", async (req, res) => {
   }
 });
 
-// 2) Signin (POST /api/v1/user/signin)
 r.post("/user/signin", async (req, res) => {
   const { email, password } = Creds.parse(req.body);
   const u = await prisma.user.findUnique({ where: { email } });
@@ -35,7 +33,6 @@ r.post("/user/signin", async (req, res) => {
   res.json({ token });
 });
 
-// 6) Get USD balance (GET /api/v1/user/balance)
 r.get("/user/balance", auth, async (req, res) => {
   const u = await prisma.user.findUnique({ where: { id: String(req.user!.id) }, select: { usdBalance: true }});
   res.json({ usd_balance: Number(u?.usdBalance ?? 0) });

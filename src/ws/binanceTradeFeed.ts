@@ -3,16 +3,15 @@ import { SUPPORTED } from "../lib/env.js";
 import { bnPriceToInt } from "../lib/math.js";
 
 type Handler = (symbol: string, priceInt: number, ts: number) => void;
-
 export class BinanceTradeFeed {
   private ws?: WebSocket | undefined;
   private reconnectTimer?: NodeJS.Timeout | undefined;
   private heartbeatTimer?: NodeJS.Timeout | undefined;
   private handlers: Handler[] = [];
   private seen = new Set<string>();
-
   public lastPrice: Record<string, number> = {};
 
+  
   start() {
     this.connect();
   }

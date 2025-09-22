@@ -2,6 +2,8 @@ import "dotenv/config";
 import { prisma } from "./lib/prisma.js";
 import bcrypt from "bcrypt";
 
+
+
 async function main() {
   const email = "demo@exness.io";
   const exists = await prisma.user.findUnique({ where: { email }});

@@ -7,14 +7,13 @@ import { env } from "../lib/env.js";
 import { auth } from "../middleware/auth.js";
 
 const r = Router();
-
 const Creds = z.object({ email: z.string().email(), password: z.string().min(6) });
 
 r.post("/user/signup", async (req, res) => {
   const { email, password } = Creds.parse(req.body);
   try {
     const exists = await prisma.user.findUnique({ where: { email } });
-    if (exists) return res.status(403).json({ message: "Error while signing up" }); // per spec wording
+    if (exists) return res.status(403).json({ message: "Error while signing up" });
     const hash = await bcrypt.hash(password, 10);
     const u = await prisma.user.create({ data: { email, password: hash }});
     res.json({ userId: u.id });
